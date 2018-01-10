@@ -6,14 +6,13 @@
 #include "graphe.h"
 
 /**
- * arguments : nom_texte sommet_origine_Prim
+ * arguments : nom_texte sommet_origine
  */
 int main(int argc, char *argv[])
 {
-	int sommetOrigine, *pere = NULL, *key = NULL;
+	int sommetOrigine;
 	graphe_t *graphe = NULL;
-	arete_t *aretes = NULL;
-	int longueurTabAretes = 0;
+	sommet_t *tabSommets = NULL;
 	if (argc != 3)
 	{
 		fprintf(stderr, "Erreur, 3 arguments requis.\n");
@@ -21,13 +20,8 @@ int main(int argc, char *argv[])
 	}
 	sommetOrigine = atoi(argv[2]);
 	graphe = creerGraphe(argv[1]);
-	afficherListesAdjacences(graphe);
-	afficherMatriceAdjacences(graphe);
-	afficherListesIncidences(graphe);
-	longueurTabAretes = genererAcpmKruskal(graphe, &aretes);
-	afficherAcpmKruskal(aretes, longueurTabAretes);
-	genererAcpmPrim(graphe, &key, &pere, sommetOrigine);
-	afficherAcpmPrim(&pere, &key, graphe->nSommets);
+	tabSommets = bellman_ford(graphe, sommetOrigine);
+	afficherBellman_ford(graphe, &tabSommets);
 	detruireGraphe(graphe);
 	return EXIT_SUCCESS;
 }

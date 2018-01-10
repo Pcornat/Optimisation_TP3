@@ -108,7 +108,7 @@ int genererAcpmKruskal(graphe_t *graph, arete_t **aretesRetenues)
 	celluleIncidence_t *cell = NULL;
 	cell_ensemble_t **tabSommet = NULL;
 	tas_t *tasArete = NULL;
-	int i, j = 0, longueurTabArete;
+	int i, longueurTabArete;
 	assert(*aretesRetenues == NULL);
 	tabEnsembleSommet = (set_t**) malloc(graph->nSommets * sizeof(set_t*));
 	tabSommet = (cell_ensemble_t **) malloc(
@@ -126,12 +126,12 @@ int genererAcpmKruskal(graphe_t *graph, arete_t **aretesRetenues)
 	 * Récupération de toutes les arêtes puis on les trie
 	 */
 	tasArete->tab = (arete_t*) malloc(tasArete->longueur * sizeof(arete_t));
-	for (i = 0; i < graph->nSommets; ++i)
-		for (cell = graph->inc[i]->tete; cell != NULL; cell = cell->succ, ++j)
+	for (i = 0, tasArete->longueur = 1; i < graph->nSommets; ++i)
+		for (cell = graph->inc[i]->tete; cell != NULL;
+				cell = cell->succ, ++(tasArete->longueur))
 		{
-			tasArete->tab[j] = *(cell->arete);
+			tasArete->tab[tasArete->longueur - 1] = *(cell->arete);
 		}
-	tasArete->longueur = j;
 	tasArete->tab = (arete_t*) realloc(tasArete->tab,
 			tasArete->longueur * sizeof(arete_t));
 	longueurTabArete = tasArete->longueur - 1;
@@ -161,87 +161,211 @@ void afficherAcpmKruskal(arete_t *tabAretesRetenues, int longueurTabArete)
 	int i, poidsMax = 0;
 	for (i = 0; i < longueurTabArete; ++i)
 	{
+		printf("origine : %d, extremite : %d, poids : %d\n",
+				tabAretesRetenues[i].origine, tabAretesRetenues[i].extremite,
+				tabAretesRetenues[i].poids);
 		poidsMax += tabAretesRetenues[i].poids;
 	}
 	printf("Poids maximal : %d\n", poidsMax);
 	free(tabAretesRetenues);
 }
 
-/**
- * Permet de chercher et trouver le poids d'une arête dans son tableau.
- */
-int chercherArete(arete_t *a, int origine, int extremite, int longueurTab)
-{
-	int i;
-	for (i = 0; i < longueurTab; ++i)
-	{
-		if ((origine == a[i].origine && extremite == a[i].extremite)
-				|| (origine == a[i].extremite && extremite == a[i].origine))
-		{
-			return a[i].poids;
-		}
-	}
-	return 0;
-}
-
-void genererAcpmPrim(graphe_t *graph, int **key, int **pere, int sommetOrigine)
+void genererAcpmPrim(graphe_t *graph, sommet_t **tab, int sommetOrigine)
 {
 	filePrioriteMin *file = NULL;
-	celluleAdjacence_t *cellAd = NULL;
-	celluleIncidence_t *cell = NULL;
-	arete_t* tabAretes = NULL;
-	int i, j = 0, u, longueurTabArete = ((graph->nSommets
-			* (graph->nSommets - 1)) / 2) - 1, poids;
+	celluleIncidence_t *v = NULL;
+	sommet_t *u;
+	int i;
 	file = creerFileMin();
-	*key = (int*) malloc(graph->nSommets * sizeof(int));
-	*pere = (int*) malloc(graph->nSommets * sizeof(int));
-	tabAretes = (arete_t*) malloc(longueurTabArete * sizeof(arete_t));
+	(*tab) = (sommet_t*) malloc(graph->nSommets * sizeof(sommet_t));
 	for (i = 0; i < graph->nSommets; ++i)
 	{
-		(*key)[i] = INT_MAX;
-		(*pere)[i] = INT_MAX; /* Implémentation par indice */
-		inserer(file, i);
-		for (cell = graph->inc[i]->tete; cell != NULL; cell = cell->succ, ++j)
-		{
-			tabAretes[j] = *(cell->arete);
-		}
+		(*tab)[i].noeud = i;
+		(*tab)[i].key = INT_MAX;
+		(*tab)[i].PointeurPere = NULL; /* Implémentation par indice */
+		inserer(file, &((*tab)[i]));
 	}
-	(*key)[sommetOrigine] = 0;
-	longueurTabArete = j;
-	tabAretes = (arete_t*) realloc(tabAretes,
-			longueurTabArete * sizeof(arete_t));
+	(*tab)[sommetOrigine].key = 0;
 	while (!isEmpty(file))
 	{
 		u = extraireMin(file);
-		for (cellAd = graph->adj[u]->tete; cellAd != NULL; cellAd =
-				cellAd->succ)
+		for (v = graph->inc[u->noeud]->tete; v != NULL; v = v->succ)
 		{
-			if (chercherNoeud(file, cellAd->noeud)
-					&& ((poids = chercherArete(tabAretes, u, cellAd->noeud,
-							longueurTabArete)) < (*key)[cellAd->noeud]))
+			if (v->arete->poids < (*tab)[v->arete->origine].key)
 			{
-				(*pere)[cellAd->noeud] = u;
-				(*key)[cellAd->noeud] = poids;
+				(*tab)[v->arete->extremite].key = v->arete->poids;
+				(*tab)[v->arete->extremite].PointeurPere = u;
 			}
 		}
 	}
 	detruireFileMin(&file);
-	free(tabAretes);
 }
 
-void afficherAcpmPrim(int **pere, int **key, int longueurTab)
+void afficherAcpmPrim(sommet_t **tab, int longueurTab)
 {
 	int i, poidsMax = 0;
 	for (i = 0; i < longueurTab; ++i)
 	{
-		printf("origine : %d, extremite : %d, poids : %d\n", (*pere)[i], i,
-				(*key)[i]);
-		if ((*key)[i] != INT_MAX && (*pere)[i] != INT_MAX)
+		if ((*tab)[i].PointeurPere != NULL)
 		{
-			poidsMax += (*key)[i];
+			printf("origine : %d, extremite : %d, poids : %d\n",
+					(*tab)[i].PointeurPere->noeud, i, (*tab)[i].key);
+		}
+		else
+		{
+			printf("origine : NULL, extremite : %d, poids : %d\n", i,
+					(*tab)[i].key);
+		}
+		if ((*tab)[i].key != INT_MAX && (*tab)[i].PointeurPere != NULL)
+		{
+			poidsMax += (*tab)[i].key;
 		}
 	}
 	printf("Poids maximal : %d\n", poidsMax);
-	free(*key), free(*pere);
-	*key = *pere = NULL;
+	free(*tab);
+	*tab = NULL;
+}
+
+void source_unique_initialisation(graphe_t *graph, sommet_t **tab,
+		int sommetOrigine)
+{
+	int i;
+	*tab = (sommet_t*) malloc(graph->nSommets * sizeof(sommet_t));
+	for (i = 0; i < graph->nSommets; ++i)
+	{
+		(*tab)[i].distance = INT_MAX;
+		(*tab)[i].noeud = i;
+		(*tab)[i].PointeurPere = NULL;
+	}
+	(*tab)[sommetOrigine].distance = 0;
+}
+
+void relacher(sommet_t *tab, arete_t *arete)
+{
+	if (tab[arete->extremite].distance
+			> (tab[arete->origine].distance + arete->poids))
+	{
+		tab[arete->extremite].distance = tab[arete->origine].distance
+				+ arete->poids;
+		tab[arete->extremite].PointeurPere = &(tab[arete->origine]);
+	}
+}
+
+sommet_t* bellman_ford(graphe_t *graphe, int sommetOrigine)
+{
+	sommet_t *tabSommet = NULL;
+	arete_t *tabAretes = NULL;
+	celluleIncidence_t *cell = NULL;
+	int longueurAretes = 1, i, j;
+	for (i = 0; i < graphe->nSommets; ++i)
+	{
+		for (cell = graphe->inc[i]->tete; cell != NULL;
+				cell = cell->succ, ++longueurAretes)
+		{
+			tabAretes = (arete_t*) realloc(tabAretes,
+					longueurAretes * sizeof(arete_t));
+			tabAretes[longueurAretes - 1] = *(cell->arete);
+		}
+	}
+	source_unique_initialisation(graphe, &tabSommet, sommetOrigine);
+	for (i = 0; i < (graphe->nSommets - 2); ++i)
+	{
+		for (j = 0; j < longueurAretes; ++j)
+		{
+			relacher(tabSommet, &(tabAretes[j]));
+		}
+	}
+	for (i = 0; i < longueurAretes; ++i)
+	{
+		if (tabSommet[tabAretes[i].extremite].distance
+				> (tabSommet[tabAretes[i].origine].distance + tabAretes[i].poids))
+		{
+			/* retourner FAUX */
+			return 0;
+		}
+	}
+	free(tabAretes);
+	/* retourner VRAI */
+	return tabSommet;
+}
+
+void afficherBellman_ford(graphe_t *graph, sommet_t **tab)
+{
+	int i;
+	for (i = 0; i < graph->nSommets; ++i)
+	{
+		if ((*tab)[i].PointeurPere == NULL)
+		{
+			printf("sommet origine : %d, pere : NULL, distance : %d\n",
+					(*tab)[i].noeud, (*tab)[i].distance);
+		}
+		else
+			printf("sommet : %d, pere : %d, distance : %d\n", (*tab)[i].noeud,
+					(*tab)[i].PointeurPere->noeud, (*tab)[i].distance);
+	}
+	free(*tab);
+	*tab = NULL;
+}
+
+/**
+ * INVALIDE, ne fonctionne pas : segfault.
+ */
+sommet_t* dijkstra(graphe_t *graphe, int sommetOrigine)
+{
+	filePrioriteMin *file = NULL;
+	sommet_t *tabSommet = NULL, *u = NULL;
+	celluleAdjacence_t *v = NULL;
+	celluleIncidence_t *cell = NULL;
+	int i;
+	/*for (i = 0; i < graphe->nSommets; ++i)
+	 {
+	 for (cell = graphe->inc[i]->tete; cell != NULL;
+	 cell = cell->succ, ++longueurAretes)
+	 {
+	 tabAretes = (arete_t*) realloc(tabAretes,
+	 longueurAretes * sizeof(arete_t));
+	 tabAretes[longueurAretes - 1] = *(cell->arete);
+	 }
+	 }*/
+	for (i = 0; i < graphe->nSommets; ++i)
+	{
+		inserer(file, &(tabSommet[i]));
+	}
+	source_unique_initialisation(graphe, &tabSommet, sommetOrigine);
+	while (!isEmpty(file))
+	{
+		u = extraireMin(file);
+		for (i = 0; i < graphe->nSommets; ++i)
+		{
+			for (v = graphe->adj[u->noeud]->tete; v != NULL; v = v->succ)
+			{
+				for (cell = graphe->inc[u->noeud]->tete;
+						(cell->arete->origine != u->noeud)
+								&& (cell->arete->extremite != v->noeud); cell =
+								cell->succ)
+				{
+					relacher(u, cell->arete);
+				}
+			}
+		}
+	}
+	return tabSommet;
+}
+
+void afficherDijkstra(graphe_t *graph, sommet_t **tab)
+{
+	int i;
+	for (i = 0; i < graph->nSommets; ++i)
+	{
+		if ((*tab)[i].PointeurPere == NULL)
+		{
+			printf("sommet origine : %d, pere : NULL, distance : %d\n",
+					(*tab)[i].noeud, (*tab)[i].distance);
+		}
+		else
+			printf("sommet : %d, pere : %d, distance : %d\n", (*tab)[i].noeud,
+					(*tab)[i].PointeurPere->noeud, (*tab)[i].distance);
+	}
+	free(*tab);
+	*tab = NULL;
 }
