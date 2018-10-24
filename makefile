@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-pipe -ansi -W -Wall -Wextra -pedantic -fmessage-length=0
+CFLAGS=-pipe -ansi -Wall -Wextra -pedantic -fmessage-length=0
 LDFLAGS=-pipe
 SRC=$(wildcard *.c)
 OBJ=$(SRC:.c=.o)
@@ -18,10 +18,10 @@ all: $(EXEC)
 $(EXEC):	$(OBJ)
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-main.o:	$(DEP)
-
-%.o:	%.c
-	$(CC) $(CFLAGS) -o $@ -c $<
+# makedepend: le package xutils-dev doit être installé
+#EDIT personnel : (sous Ubuntu/Debian c'est valide)
+depend:
+	@makedepend -- $(CFLAGS) -- -Y $(SRCS) 2> /dev/null
 
 .PHONY: clean mrproper
 clean:
@@ -29,3 +29,5 @@ clean:
 
 mrproper:	clean
 	rm -f $(EXEC)
+
+# DO NOT DELETE THIS LINE
