@@ -1,56 +1,109 @@
 #include "ensemble.h"
 
-#include <stdlib.h>
-
-set_t* creerEnsembleVide(void)
-{
-	set_t *a = (set_t*) malloc(sizeof(set_t));
-	a->queue = a->tete = NULL;
-	a->size = 0;
-	return a;
-}
-
-set_t* creerEnsemble(cell_ensemble_t *sommet)
-{
-	set_t *a = (set_t*) malloc(sizeof(set_t));
-	a->tete = a->queue = NULL;
-	a->queue = a->tete = sommet;
-	a->tete->representant = a;
-	a->size = 1;
-	return a;
-}
-
-set_t* trouverEnsemble(cell_ensemble_t *x)
-{
-	return x->representant;
-}
-
-/**
- * Application avec l'heuristique de l'union pondérée
- * pour un temps d'exécution plus faible.
- */
-void union_ensemble(cell_ensemble_t *x, cell_ensemble_t *y)
-{
-	set_t *a = x->representant, *b = y->representant;
-	cell_ensemble_t *cell = NULL;
-	if (b->size <= a->size)
-	{
-		a->size += b->size;
-		a->queue->succ = b->tete;
-		a->queue = b->queue;
-		for (cell = b->tete; cell != NULL; cell = cell->succ)
-		{
-			cell->representant = a;
-		}
+arete **creerArete(int nbSommet) {
+	// cree un tableau d'arêtes
+	arete **tab = (arete **) (malloc(sizeof(arete *) * (nbSommet)));
+	int i;
+	for (i = 0; i < nbSommet; ++i) {
+		tab[i] = (arete *) (malloc(sizeof(arete)));
 	}
-	else
-	{
-		b->size += a->size;
-		b->queue->succ = a->tete;
-		b->queue = a->queue;
-		for (cell = a->tete; cell != NULL; cell = cell->succ)
-		{
-			cell->representant = b;
+	return tab;
+}
+
+void detruireArete(arete **t, int taille) {
+	/*
+  int i;
+	for(i=0;i<taille;i++){
+    detruireA(t[i]);
+  }*/
+	free(t);
+	t = NULL;
+}
+
+void detruireA(arete *t) {
+	free(t);
+}
+
+ensemble *creer_ensemble(int s) {
+	ensemble *E = (ensemble *) (malloc(sizeof(ensemble)));
+	cellS *sommet = (cellS *) (malloc(sizeof(cellS)));
+
+	//On cree le sommet
+	sommet->val = s;
+	sommet->next = NULL;
+	sommet->ens = E;
+
+	E->tete = sommet;
+	E->queue = sommet;
+	return E;
+}
+
+void detruireEnsemble(ensemble **E, int taille) {
+	/*
+	cellS *tmp;
+	tmp=E[0]->tete;
+	while(tmp!=NULL){
+	  E[0]->tete=tmp->next;
+	  free(tmp);
+	  tmp=tmp->next;
+	}*/
+	free(E);
+}
+
+//On renvoie le representant de l'ensemble
+cellS *trouver_ensemble(cellS *sommet) {
+	return sommet->ens->tete;
+}
+
+//union de deux ensembles
+void unionE(cellS *x, cellS *y) {
+	cellS *s3;
+	x->ens->queue->next = y->ens->tete;
+	x->ens->queue = y->ens->queue;
+	for (s3 = y->ens->tete; s3 != NULL; s3 = s3->next)
+		s3->ens = x->ens;
+}
+
+//triRapide triant par ordre croisant de poids
+void triRapide(arete **t, int taille) {
+	int sep, i;
+	arete *pivot, *tmp;
+	if (taille < 2) return;
+	pivot = t[taille - 1];
+	sep = i = 0;
+	while (i < taille) {
+		if (t[i]->poids <= pivot->poids) {
+			if (sep != i) {
+				tmp = t[i];
+				t[i] = t[sep];
+				t[sep] = tmp;
+			}
+			sep++;
 		}
+		i++;
 	}
+	triRapide(t, sep - 1);
+	triRapide(t + sep - 1, taille - sep + 1);
+}
+
+//fonction calculant le poids de l'arbre sur le tas
+int distanceKruskal(arete **t, int taille) {
+	int i, som = 0;
+	for (i = 0; i < taille; ++i) {
+		som += t[i]->poids;
+	}
+	return som;
+}
+
+void afficherKruskal(arete **t, int taille) {
+	int i;
+	printf("aretes retenues: \n\n");
+	printf(" ------------------------ \n");
+	printf("| depart | arrive | cout |\n");
+	printf("|------------------------|\n");
+	for (i = 0; i < taille; ++i) {
+		printf("| %d\t | %d\t  | %d \t |\n", t[i]->s1, t[i]->s2, t[i]->poids);
+	}
+	printf(" ------------------------ \n");
+	printf("\nLe poids de l'arbre est: %d\n", distanceKruskal(t, taille));
 }

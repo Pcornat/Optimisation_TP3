@@ -1,65 +1,79 @@
 #include "file.h"
 
-#include <limits.h>
-#include <stdlib.h>
-
-file_t *creerFile(unsigned int capacite)
-{
-	file_t *queue = (file_t *) malloc(sizeof(file_t));
-	queue->array = (int *) malloc(queue->capacity * sizeof(int));
-	queue->capacity = capacite;
-	queue->front = queue->size = 0;
-	queue->rear = capacite - 1;
-	return queue;
+parcours *creerParcours(int x) {
+	parcours *p = (parcours *) malloc(sizeof(parcours));
+	p->sommet = x;
+	p->couleur = BLANC;
+	p->distance = 99999;
+	p->pere = 0;
+	return p;
 }
 
-void detruireFile(file_t **queue)
-{
-	free((*queue)->array);
-	free(*queue);
-	*queue = NULL;
+
+cel *creercel(parcours *p) {
+	cel *c = (cel *) malloc(sizeof(cel));
+	c->succ = NULL;
+	c->value = p;
+	return c;
 }
 
-int file_isFull(file_t *queue)
-{
-	return (queue->size == queue->capacity);
+void detruirecel(cel **c) {
+	free((*c)->value);
+	free(*c);
+	*c = NULL;
 }
 
-int file_isEmpty(file_t *queue)
-{
-	return (queue->size == 0);
+
+file *creerFile() {
+	file *f = (file *) malloc(sizeof(file));
+	f->tete = NULL;
+	f->taille = 0;
+	f->queue = NULL;
+	return f;
 }
 
-void enfile(file_t *queue, int item)
-{
-	if (file_isFull(queue))
-		return;
-	queue->rear = (queue->rear + 1) % queue->capacity;
-	queue->array[queue->rear] = item;
-	++(queue->size);
+void detruireFile(file **f) {
+	cel *tmp = (*f)->tete;
+	while (tmp != NULL) {
+		(*f)->tete = (*f)->tete->succ;
+		detruirecel(&tmp);
+		tmp = (*f)->tete;
+	}
+	free((*f));
+	(*f) = NULL;
 }
 
-int defile(file_t *queue)
-{
-	int item;
-	if (file_isEmpty(queue))
-		return INT_MAX;
-	item = queue->array[queue->front];
-	queue->front = (queue->front + 1) % queue->capacity;
-	--(queue->size);
-	return item;
+int fileVide(file *f) {
+	return f->tete == NULL;
+}//1  vide / 0 non vide
+
+void enfiler(file *f, parcours *p) {
+	if (fileVide(f)) {
+		f->queue = creercel(p);
+		f->tete = f->queue;
+		f->taille++;
+	} else {
+		f->queue->succ = creercel(p);
+		f->queue = f->queue->succ;
+		f->taille++;
+	}
 }
 
-int front(file_t *queue)
-{
-	if (file_isEmpty(queue))
-		return INT_MAX;
-	return queue->array[queue->front];
+cel *defiler(file *f) {
+	cel *tmp = f->tete;
+	if (!fileVide(f)) {
+		f->tete = f->tete->succ;
+		f->taille--;
+	}
+	return tmp;
 }
 
-int rear(file_t *queue)
-{
-	if (file_isEmpty(queue))
-		return INT_MAX;
-	return queue->array[queue->rear];
+void afficher(file *f) {
+	printf("f.tete <-");
+	cel *tmp = f->tete;
+	while (tmp != NULL) {
+		printf(" %d <-", tmp->value->sommet);
+		tmp = tmp->succ;
+	}
+	printf(" f.queue \n");
 }

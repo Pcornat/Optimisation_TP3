@@ -1,18 +1,48 @@
-#ifndef ENSEMBLE_H_
-#define ENSEMBLE_H_
+#ifndef H_ENSEMBLE
+#define H_ENSEMBLE
 
-#include "cellEnsemble.h"
+#include <stdlib.h>
+#include <stdio.h>
 
-typedef struct setter_t
-{
-	cell_ensemble_t *tete;
-	cell_ensemble_t *queue;
-	int size; /* Heuristique de l'union pondérée */
-} set_t;
+//structure représentant un arc
+typedef struct arete {
+	int s1;
+	int s2;
+	int poids;
+} arete;
 
-set_t* creerEnsembleVide(void);
-set_t* creerEnsemble(cell_ensemble_t *sommet);
-set_t* trouverEnsemble(cell_ensemble_t *x);
-void union_ensemble(cell_ensemble_t *x, cell_ensemble_t *y); /* Plus rapide d'ajouter un ensemble petit à la queue d'un ensemble grand. */
+//structure cellule pour une file
+//next pointe sur l'elem suivant et ens sur l'ensemble auquel  il appartient
+typedef struct cellS {
+	int val;// sommet
+	struct cellS *next;
+	struct ensemble *ens;
+} cellS;
 
-#endif /* ENSEMBLE_H_ */
+//file pour l'ensemble
+typedef struct ensemble {
+	struct cellS *tete;
+	struct cellS *queue;
+} ensemble;
+
+arete **creerArete(int);
+
+void detruireArete(arete **, int);
+
+void detruireA(arete *t);
+
+void detruireEnsemble(ensemble **, int);
+
+ensemble *creer_ensemble(int);
+
+cellS *trouver_ensemble(cellS *);
+
+void unionE(cellS *, cellS *);
+
+void triRapide(arete **, int);
+
+int distanceKruskal(arete **, int);
+
+void afficherKruskal(arete **, int);
+
+#endif

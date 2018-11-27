@@ -4,4 +4,4 @@
 .idea/
 cmake-build-debug/
 *.o
-prog
+graphe

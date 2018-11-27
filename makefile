@@ -1,33 +1,24 @@
+PGM=graphe
+C_FLAG=-Wall -o3 -g -std=c99 -pedantic
 CC=gcc
-CFLAGS=-pipe -ansi -Wall -Wextra -pedantic -fmessage-length=0
-LDFLAGS=-pipe
 SRC=$(wildcard *.c)
-OBJ=$(SRC:.c=.o)
-DEP=$(wildcard *.h)
-DEBUG=
-EXEC=graphe
+OBJ=$(SRC:*.c=*.o)
+LD=
 
-ifeq ($(DEBUG), yes)
-	CFLAGS += -g3
-else
-	CFLAGS += -O3
-endif
+all:$(PGM)
 
-all: $(EXEC)
+%.o:%.c %.h
+	$(CC) $< -c $(C_FLAG)
 
-$(EXEC):	$(OBJ)
-	$(CC) -o $@ $^ $(LDFLAGS)
+$(PGM):$(OBJ)s
+	$(CC) $(C_FLAG) $^ -o $@ $(LD)
 
-# makedepend: le package xutils-dev doit être installé
-#EDIT personnel : (sous Ubuntu/Debian c'est valide)
-depend:
-	@makedepend -- $(CFLAGS) -- -Y $(SRCS) 2> /dev/null
-
-.PHONY: clean mrproper
 clean:
 	rm -rf *.o
 
-mrproper:	clean
-	rm -f $(EXEC)
+mrproper: clean
+	rm -rf $(PGM)
 
-# DO NOT DELETE THIS LINE
+compil: mrproper
+	make
+

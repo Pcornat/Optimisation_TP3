@@ -1,28 +1,33 @@
-#ifndef GRAPHE_H_
-#define GRAPHE_H_
+#ifndef H_GRAPHE
+#define H_GRAPHE
 
-#include "liste_adjacence.h"
-#include "listeIncidence.h"
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include "ListeAdj.h"
+#include "file.h"
 
-typedef struct
-{
-	int nSommets; /* nombre de sommets*/
-	int oriente; /* oriente : 1 ; sinon 0 */
-	int evalue; /* évalué : 1 ; sinon 0 */
-	int complet; /* complet : 1 ; sinon 0 */
-	listeAdjacence_t **adj; /* Pointeur de tableau de pointeur de listeAdjacence_t */
-	listeIncidence_t **inc;
-	int **matrice_adj; /* Matrice d'adjacence, toujours carrée */
-} graphe_t;
+typedef struct graphe {
+	int nbSommet;
+	int oriente;
+	int value;
+	int complet;
+	ListeAdj *l;
+	int **matrice;
+} graphe;
 
-/*Valide*/
-void creerListesAdjacences(graphe_t *graph, char *fileName);
-/*Valide*/
-void afficherListesAdjacences(graphe_t *graph);
-void afficherListesIncidences(graphe_t *graph);
-void creerMatriceAdjacences(graphe_t *graph, char *fileName);
-void afficherMatriceAdjacences(graphe_t *graph);
-graphe_t *creerGraphe(char *fileName);
-void detruireGraphe(graphe_t *graph);
+void creerListesAdjacences(char *, graphe *);
 
-#endif /* GRAPHE_H_ */
+void afficherListesAdjacences(graphe *);
+
+void creerMatriceAdjacences(char *, graphe *);
+
+void afficherMatriceAdjacences(graphe *);
+
+graphe *creerGraphe(char *);
+
+void detruireGraphe(graphe **);
+
+parcours **parcoursLargeur(graphe *, int);
+
+#endif
