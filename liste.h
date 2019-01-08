@@ -1,6 +1,5 @@
 #ifndef H_LISTE
 #define H_LISTE
-
 #include <stdlib.h>
 #include <string.h>
 
@@ -34,5 +33,4 @@ void supprimer(liste *, cellule *);
 void afficherListe(liste *);
 
 int compteListe(liste *);
-
 #endif

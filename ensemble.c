@@ -49,7 +49,6 @@ void detruireEnsemble(ensemble **E, int taille) {
 	}*/
 	free(E);
 }
-
 //On renvoie le representant de l'ensemble
 cellS *trouver_ensemble(cellS *sommet) {
 	return sommet->ens->tete;
@@ -97,13 +96,9 @@ int distanceKruskal(arete **t, int taille) {
 
 void afficherKruskal(arete **t, int taille) {
 	int i;
-	printf("aretes retenues: \n\n");
-	printf(" ------------------------ \n");
-	printf("| depart | arrive | cout |\n");
-	printf("|------------------------|\n");
+	printf("Arbre couvrant de poids minimum : \n");
 	for (i = 0; i < taille; ++i) {
-		printf("| %d\t | %d\t  | %d \t |\n", t[i]->s1, t[i]->s2, t[i]->poids);
+		printf("%2d\t %2d\n", t[i]->s1, t[i]->s2);
 	}
-	printf(" ------------------------ \n");
-	printf("\nLe poids de l'arbre est: %d\n", distanceKruskal(t, taille));
+	printf("Longueur de l'arbre : %d\n", distanceKruskal(t, taille));
 }

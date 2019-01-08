@@ -45,7 +45,7 @@ void creerListesAdjacences(char *nomfichier, graphe *g) {
 					fscanf(fichier, "%s", buff);
 					x = atoi(buff);
 					fscanf(fichier, "%s", buff);
-					poids = atoi(buff);
+					poids = ²atoi(buff);
 					insererListeAdj(g->l, indice, x, poids);
 				}
 			}

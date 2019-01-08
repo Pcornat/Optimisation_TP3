@@ -1,9 +1,7 @@
 #ifndef H_FILE
 #define H_FILE
-
 #include <stdio.h>
 #include <stdlib.h>
-
 #define BLANC 0
 #define GRIS 1
 #define NOIR 2
@@ -45,5 +43,4 @@ void enfiler(file *, parcours *);
 cel *defiler(file *);
 
 void afficher(file *);
-
 #endif

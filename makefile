@@ -1,24 +1,34 @@
-PGM=graphe
-C_FLAG=-Wall -o3 -g -std=c99 -pedantic
-CC=gcc
-SRC=$(wildcard *.c)
-OBJ=$(SRC:*.c=*.o)
-LD=
+CC = gcc
+CFLAGS = -pipe -march=native -std=c99 -Wall -Wextra -O3
+LDLIBS =
+LDFLAGS = -pipe
 
-all:$(PGM)
+SRCS = $(wildcard *.c)
+OBJS = $(SRCS:.c=.o)
 
-%.o:%.c %.h
-	$(CC) $< -c $(C_FLAG)
+EXE = prog
 
-$(PGM):$(OBJ)s
-	$(CC) $(C_FLAG) $^ -o $@ $(LD)
+.PHONY:	clean mrproper
+
+all:	depend $(EXE)
+
+$(EXE): depend $(OBJS)
+	$(CC) $(LDFLAGS) -o $@ $(OBJS) $(LDLIBS)
+
+# makedepend: le package xutils-dev doit être installé
+#EDIT personnel : (sous Ubuntu/Debian c'est valide)
+depend:
+	@makedepend -- $(CFLAGS) -- -Y $(SRCS) 2> /dev/null
 
 clean:
-	rm -rf *.o
+	rm -f *.o
 
-mrproper: clean
-	rm -rf $(PGM)
+mrproper:	clean
+	rm -f $(EXE)
 
-compil: mrproper
-	make
+# DO NOT DELETE THIS LINE
 
+probleme.o: probleme.h types.h pivot.h
+utils.o: utils.h
+main.o: probleme.h types.h pivot.h
+pivot.o: pivot.h types.h utils.h

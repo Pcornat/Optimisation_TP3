@@ -1,6 +1,5 @@
 #ifndef H_GRAPHE
 #define H_GRAPHE
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -29,5 +28,4 @@ graphe *creerGraphe(char *);
 void detruireGraphe(graphe **);
 
 parcours **parcoursLargeur(graphe *, int);
-
 #endif

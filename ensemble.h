@@ -1,9 +1,7 @@
 #ifndef H_ENSEMBLE
 #define H_ENSEMBLE
-
 #include <stdlib.h>
 #include <stdio.h>
-
 //structure représentant un arc
 typedef struct arete {
 	int s1;
@@ -28,7 +26,6 @@ typedef struct ensemble {
 arete **creerArete(int);
 
 void detruireArete(arete **, int);
-
 void detruireA(arete *t);
 
 void detruireEnsemble(ensemble **, int);
@@ -44,5 +41,4 @@ void triRapide(arete **, int);
 int distanceKruskal(arete **, int);
 
 void afficherKruskal(arete **, int);
-
 #endif

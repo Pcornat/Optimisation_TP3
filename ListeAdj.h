@@ -1,6 +1,5 @@
 #ifndef H_LISTEADJ
 #define H_LISTEADJ
-
 #include "liste.h"
 #include <stdio.h>
 
@@ -22,5 +21,4 @@ cellule *rechercherListeAdj(ListeAdj *, int, int);
 void supprimerListeAdj(ListeAdj *, int, int);
 
 int compteTabListe(ListeAdj *);
-
 #endif
